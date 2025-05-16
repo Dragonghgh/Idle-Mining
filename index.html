@@ -1,213 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>⛏️ Mine Clicker</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #eee;
-      text-align: center;
-      padding: 20px;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    .button {
-      padding: 15px 30px;
-      margin: 10px;
-      font-size: 20px;
-      background-color: #444;
-      border: none;
-      color: white;
-      cursor: pointer;
-      border-radius: 10px;
-      touch-action: manipulation; /* Disable zoom on tap */
-    }
-    .button:hover {
-      background-color: #666;
-    }
-    .upgrade {
-      background-color: #222;
-      border: 1px solid #555;
-      margin: 10px auto;
-      padding: 10px;
-      width: 300px;
-      border-radius: 10px;
-    }
-    .section-title {
-      font-size: 1.3em;
-      margin-top: 30px;
-      border-top: 1px solid #333;
-      padding-top: 20px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>⛏️ Mine Clicker with Gem Shop</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #eee;
+    text-align: center;
+    padding: 20px;
+    user-select: none;
+  }
+  .button {
+    padding: 15px 30px;
+    margin: 10px;
+    font-size: 18px;
+    background-color: #333;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 10px;
+    touch-action: manipulation; /* disables zoom on tap */
+  }
+  .button:hover {
+    background-color: #555;
+  }
+  .upgrade, .gem-shop-item {
+    background-color: #222;
+    border: 1px solid #444;
+    margin: 10px auto;
+    padding: 15px;
+    width: 320px;
+    border-radius: 10px;
+  }
+  .section-title {
+    font-size: 1.4em;
+    margin-top: 30px;
+    border-top: 1px solid #333;
+    padding-top: 20px;
+  }
+</style>
 </head>
 <body>
+
   <h1>⛏️ Mine Clicker</h1>
+
   <p>💰 Coins: <strong id="coins">0</strong></p>
   <p>👆 Per Click: <strong id="clickPower">1</strong></p>
   <p>⏱️ Per Second: <strong id="autoPower">0</strong></p>
   <p>💎 Prestige Gems: <strong id="prestigePoints">0</strong> (Bonus: <strong id="prestigeBonus">1.00x</strong>)</p>
-  
+
   <button class="button" onclick="mine()">⛏️ Mine!</button>
-  
+
   <div class="section-title">🔧 Upgrades</div>
-  
+
   <div class="upgrade">
     <p><strong>Upgrade Pickaxe</strong> (+1 per click)</p>
     <p>Cost: <span id="clickUpgradeCost">10</span> coins</p>
     <button class="button" onclick="buyClickUpgrade()">Buy</button>
   </div>
-  
+
   <div class="upgrade">
     <p><strong>Hire Miner</strong> (+1 per second)</p>
     <p>Cost: <span id="autoUpgradeCost">50</span> coins</p>
     <button class="button" onclick="buyAutoUpgrade()">Buy</button>
   </div>
-  
+
   <div class="upgrade">
     <p><strong>Buy Drill</strong> (x2 auto income multiplier)</p>
     <p>Cost: <span id="drillUpgradeCost">200</span> coins</p>
     <button class="button" onclick="buyDrillUpgrade()">Buy</button>
   </div>
-  
+
   <div class="section-title">🔁 Prestige</div>
   <p>Reach 10,000 coins to Prestige and earn Gems that boost all income permanently.</p>
   <button class="button" onclick="prestige()">Prestige</button>
 
-  <script>
-    // Variables
-    let coins = 0;
-    let clickPower = 1;
-    let autoPower = 0;
-    let drillMultiplier = 1;
-    let prestigePoints = 0;
-    let prestigeBonus = 1.0;
+  <div class="section-title">💎 Gem Shop</div>
 
-    let clickUpgradeCost = 10;
-    let autoUpgradeCost = 50;
-    let drillUpgradeCost = 200;
+  <div class="gem-shop-item">
+    <p><strong>+1 Click Power Bonus</strong></p>
+    <p>Cost: <span id="gemClickBonusCost">5</span> gems</p>
+    <button class="button" onclick="buyGemClickBonus()">Buy</button>
+  </div>
 
-    // Update UI elements
-    function updateUI() {
-      document.getElementById('coins').textContent = Math.floor(coins);
-      document.getElementById('clickPower').textContent = clickPower;
-      document.getElementById('autoPower').textContent = autoPower * drillMultiplier;
-      document.getElementById('prestigePoints').textContent = prestigePoints;
-      document.getElementById('prestigeBonus').textContent = prestigeBonus.toFixed(2) + 'x';
-      document.getElementById('clickUpgradeCost').textContent = clickUpgradeCost;
-      document.getElementById('autoUpgradeCost').textContent = autoUpgradeCost;
-      document.getElementById('drillUpgradeCost').textContent = drillUpgradeCost;
-    }
+  <div class="gem-shop-item">
+    <p><strong>x2 Auto Power Multiplier</strong></p>
+    <p>Cost: <span id="gemAutoBonusCost">10</span> gems</p>
+    <button class="button" onclick="buyGemAutoBonus()">Buy</button>
+  </div>
 
-    // Mine button function
-    function mine() {
-      coins += clickPower * prestigeBonus;
-      updateUI();
-    }
+<script>
+  // Game State Variables
+  let coins = 0;
+  let clickPower = 1;
+  let autoPower = 0;
+  let drillMultiplier = 1;
+  let prestigePoints = 0;
+  let prestigeBonus = 1.0;
 
-    // Buy upgrades
-    function buyClickUpgrade() {
-      if (coins >= clickUpgradeCost) {
-        coins -= clickUpgradeCost;
-        clickPower++;
-        clickUpgradeCost = Math.floor(clickUpgradeCost * 1.5);
-        updateUI();
-      }
-    }
+  let clickUpgradeCost = 10;
+  let autoUpgradeCost = 50;
+  let drillUpgradeCost = 200;
 
-    function buyAutoUpgrade() {
-      if (coins >= autoUpgradeCost) {
-        coins -= autoUpgradeCost;
-        autoPower++;
-        autoUpgradeCost = Math.floor(autoUpgradeCost * 2);
-        updateUI();
-      }
-    }
+  // Gem Shop Bonuses
+  let gemClickBonus = 0;     // Adds to clickPower permanently
+  let gemAutoMultiplier = 1; // Multiplies auto income
 
-    function buyDrillUpgrade() {
-      if (coins >= drillUpgradeCost) {
-        coins -= drillUpgradeCost;
-        drillMultiplier *= 2;
-        drillUpgradeCost = Math.floor(drillUpgradeCost * 3);
-        updateUI();
-      }
-    }
+  const gemClickBonusCostStart = 5;
+  const gemAutoBonusCostStart = 10;
 
-    // Prestige resets progress but grants permanent bonus
-    function prestige() {
-      if (coins >= 10000) {
-        prestigePoints++;
-        prestigeBonus = 1 + (prestigePoints * 0.1);
-        coins = 0;
-        clickPower = 1;
-        autoPower = 0;
-        drillMultiplier = 1;
-        clickUpgradeCost = 10;
-        autoUpgradeCost = 50;
-        drillUpgradeCost = 200;
-        alert("🎉 You prestiged! Your progress resets but you gain permanent bonus income.");
-        updateUI();
-        saveGame();
-      } else {
-        alert("You need at least 10,000 coins to prestige.");
-      }
-    }
+  // Update UI
+  function updateUI() {
+    document.getElementById('coins').textContent = Math.floor(coins);
+    document.getElementById('clickPower').textContent = clickPower + gemClickBonus;
+    document.getElementById('autoPower').textContent = autoPower * drillMultiplier * gemAutoMultiplier;
+    document.getElementById('prestigePoints').textContent = prestigePoints;
+    document.getElementById('prestigeBonus').textContent = prestigeBonus.toFixed(2) + 'x';
 
-    // Save/load game state to localStorage
-    function saveGame() {
-      const save = {
-        coins,
-        clickPower,
-        autoPower,
-        drillMultiplier,
-        prestigePoints,
-        prestigeBonus,
-        clickUpgradeCost,
-        autoUpgradeCost,
-        drillUpgradeCost,
-        lastSave: Date.now()
-      };
-      localStorage.setItem('mineClickerSave', JSON.stringify(save));
-    }
+    document.getElementById('clickUpgradeCost').textContent = clickUpgradeCost;
+    document.getElementById('autoUpgradeCost').textContent = autoUpgradeCost;
+    document.getElementById('drillUpgradeCost').textContent = drillUpgradeCost;
 
-    function loadGame() {
-      const save = JSON.parse(localStorage.getItem('mineClickerSave'));
-      if (save) {
-        const now = Date.now();
-        const offlineSeconds = Math.floor((now - save.lastSave) / 1000);
+    document.getElementById('gemClickBonusCost').textContent = gemClickBonusCostStart + gemClickBonus * 3;
+    document.getElementById('gemAutoBonusCost').textContent = gemAutoBonusCostStart * gemAutoMultiplier;
+  }
 
-        coins = Number(save.coins) + Number(save.autoPower) * Number(save.drillMultiplier) * offlineSeconds * Number(save.prestigeBonus);
-        clickPower = Number(save.clickPower);
-        autoPower = Number(save.autoPower);
-        drillMultiplier = Number(save.drillMultiplier);
-        prestigePoints = Number(save.prestigePoints);
-        prestigeBonus = Number(save.prestigeBonus);
-        clickUpgradeCost = Number(save.clickUpgradeCost);
-        autoUpgradeCost = Number(save.autoUpgradeCost);
-        drillUpgradeCost = Number(save.drillUpgradeCost);
-      }
-    }
+  // Mine button function
+  function mine() {
+    coins += (clickPower + gemClickBonus) * prestigeBonus;
+    updateUI();
+  }
 
-    // Auto mine income every second
-    setInterval(() => {
-      coins += autoPower * drillMultiplier * prestigeBonus;
+  // Buy Upgrades
+  function buyClickUpgrade() {
+    if (coins >= clickUpgradeCost) {
+      coins -= clickUpgradeCost;
+      clickPower++;
+      clickUpgradeCost = Math.floor(clickUpgradeCost * 1.5);
       updateUI();
       saveGame();
-    }, 1000);
+    } else {
+      alert("Not enough coins!");
+    }
+  }
 
-    // Load saved game and update UI on page load
-    window.onload = () => {
-      loadGame();
+  function buyAutoUpgrade() {
+    if (coins >= autoUpgradeCost) {
+      coins -= autoUpgradeCost;
+      autoPower++;
+      autoUpgradeCost = Math.floor(autoUpgradeCost * 2);
       updateUI();
+      saveGame();
+    } else {
+      alert("Not enough coins!");
+    }
+  }
+
+  function buyDrillUpgrade() {
+    if (coins >= drillUpgradeCost) {
+      coins -= drillUpgradeCost;
+      drillMultiplier *= 2;
+      drillUpgradeCost = Math.floor(drillUpgradeCost * 3);
+      updateUI();
+      saveGame();
+    } else {
+      alert("Not enough coins!");
+    }
+  }
+
+  // Prestige resets coins and upgrades but grants gems & bonus
+  function prestige() {
+    if (coins >= 10000) {
+      prestigePoints++;
+      prestigeBonus = 1 + (prestigePoints * 0.1);
+
+      // Reset everything except gems and bonuses
+      coins = 0;
+      clickPower = 1;
+      autoPower = 0;
+      drillMultiplier = 1;
+      clickUpgradeCost = 10;
+      autoUpgradeCost = 50;
+      drillUpgradeCost = 200;
+
+      alert("🎉 You prestiged! Gems earned: " + prestigePoints + ". Your progress resets, but income is boosted permanently.");
+      updateUI();
+      saveGame();
+    } else {
+      alert("You need at least 10,000 coins to prestige.");
+    }
+  }
+
+  // Gem Shop purchases
+  function buyGemClickBonus() {
+    const cost = gemClickBonusCostStart + gemClickBonus * 3;
+    if (prestigePoints >= cost) {
+      prestigePoints -= cost;
+      gemClickBonus++;
+      updateUI();
+      saveGame();
+    } else {
+      alert("Not enough gems!");
+    }
+  }
+
+  function buyGemAutoBonus() {
+    const cost = gemAutoBonusCostStart * gemAutoMultiplier;
+    if (prestigePoints >= cost) {
+      prestigePoints -= cost;
+      gemAutoMultiplier *= 2;
+      updateUI();
+      saveGame();
+    } else {
+      alert("Not enough gems!");
+    }
+  }
+
+  // Save and Load Game
+  function saveGame() {
+    const save = {
+      coins,
+      clickPower,
+      autoPower,
+      drillMultiplier,
+      prestigePoints,
+      prestigeBonus,
+      clickUpgradeCost,
+      autoUpgradeCost,
+      drillUpgradeCost,
+      gemClickBonus,
+      gemAutoMultiplier,
+      lastSave: Date.now()
     };
+    localStorage.setItem('mineClickerSave', JSON.stringify(save));
+  }
 
-    // Save periodically every 10 seconds just in case
-    setInterval(() => {
-      saveGame();
-    }, 10000);
-  </script>
+  function loadGame() {
+    const save = JSON.parse(localStorage.getItem('mineClickerSave'));
+    if (save) {
+      const now = Date.now();
+      const offlineSeconds = Math.floor((now - save.lastSave) / 1000);
+
+      coins = Number(save.coins) + Number(save.autoPower) * Number(save.drillMultiplier) * Number(save.gemAutoMultiplier) * offlineSeconds * Number(save.prestigeBonus);
+      clickPower = Number(save.clickPower);
+      autoPower = Number(save.autoPower);
+      drillMultiplier = Number(save.drillMultiplier);
+      prestigePoints = Number(save.prestigePoints);
+      prestigeBonus = Number(save.prestigeBonus);
+      clickUpgradeCost = Number(save.clickUpgradeCost);
+      autoUpgradeCost = Number(save.autoUpgradeCost);
+      drillUpgradeCost = Number(save.drillUpgradeCost);
+
+      gemClickBonus = Number(save.gemClickBonus);
+      gemAutoMultiplier = Number(save.gemAutoMultiplier);
+    }
+  }
+
+  // Auto income every second
+  setInterval(() => {
+    coins += autoPower * drillMultiplier * gemAutoMultiplier * prestigeBonus;
+    updateUI();
+    saveGame();
+  }, 1000);
+
+  // Initialize
+  window.onload = () => {
+    loadGame();
+    updateUI();
+  };
+
+  // Periodic save every 10 seconds
+  setInterval(() => {
+    saveGame();
+  }, 10000);
+</script>
+
 </body>
 </html>
