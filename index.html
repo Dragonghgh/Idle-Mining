@@ -186,8 +186,10 @@
       saveGame();
     }, 1000);
 
-    loadGame();
-    updateUI();
+    window.onload = function () {
+      loadGame();
+      updateUI();
+    };
   </script>
 </body>
 </html>
