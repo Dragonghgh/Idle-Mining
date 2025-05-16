@@ -33,6 +33,12 @@
       width: 300px;
       border-radius: 10px;
     }
+    .section-title {
+      font-size: 1.2em;
+      margin-top: 30px;
+      border-top: 1px solid #333;
+      padding-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -40,7 +46,10 @@
   <p>💰 <strong id="coins">0</strong> coins</p>
   <p>👆 <strong id="clickPower">1</strong> per click</p>
   <p>⏱️ <strong id="autoPower">0</strong> per second</p>
-  <button class="button" onclick="mine()">Mine!</button>
+  <p>💎 Prestige Gems: <strong id="prestigePoints">0</strong> (Bonus: <strong id="prestigeBonus">1.00x</strong>)</p>
+  <button class="button" onclick="mine()">⛏️ Mine!</button>
+
+  <div class="section-title">🔧 Upgrades</div>
 
   <div class="upgrade">
     <p><strong>Upgrade Pickaxe</strong> (+1 per click)</p>
@@ -54,24 +63,41 @@
     <button class="button" onclick="buyAutoUpgrade()">Buy</button>
   </div>
 
+  <div class="upgrade">
+    <p><strong>Buy Drill</strong> (x2 auto income)</p>
+    <p>Cost: <span id="drillUpgradeCost">200</span> coins</p>
+    <button class="button" onclick="buyDrillUpgrade()">Buy</button>
+  </div>
+
+  <div class="section-title">🔁 Prestige</div>
+  <p>Reach 10,000 coins to Prestige and earn gems that boost all income.</p>
+  <button class="button" onclick="prestige()">Prestige</button>
+
   <script>
     let coins = 0;
     let clickPower = 1;
     let autoPower = 0;
     let clickUpgradeCost = 10;
     let autoUpgradeCost = 50;
+    let drillUpgradeCost = 200;
+    let drillMultiplier = 1;
+    let prestigePoints = 0;
+    let prestigeBonus = 1.0;
     let lastSave = Date.now();
 
     function updateUI() {
       document.getElementById('coins').textContent = Math.floor(coins);
       document.getElementById('clickPower').textContent = clickPower;
-      document.getElementById('autoPower').textContent = autoPower;
+      document.getElementById('autoPower').textContent = autoPower * drillMultiplier;
       document.getElementById('clickUpgradeCost').textContent = clickUpgradeCost;
       document.getElementById('autoUpgradeCost').textContent = autoUpgradeCost;
+      document.getElementById('drillUpgradeCost').textContent = drillUpgradeCost;
+      document.getElementById('prestigePoints').textContent = prestigePoints;
+      document.getElementById('prestigeBonus').textContent = prestigeBonus.toFixed(2) + 'x';
     }
 
     function mine() {
-      coins += clickPower;
+      coins += clickPower * prestigeBonus;
       updateUI();
     }
 
@@ -93,6 +119,32 @@
       }
     }
 
+    function buyDrillUpgrade() {
+      if (coins >= drillUpgradeCost) {
+        coins -= drillUpgradeCost;
+        drillMultiplier *= 2;
+        drillUpgradeCost = Math.floor(drillUpgradeCost * 3);
+        updateUI();
+      }
+    }
+
+    function prestige() {
+      if (coins >= 10000) {
+        prestigePoints++;
+        prestigeBonus = 1 + (prestigePoints * 0.1);
+        coins = 0;
+        clickPower = 1;
+        autoPower = 0;
+        clickUpgradeCost = 10;
+        autoUpgradeCost = 50;
+        drillUpgradeCost = 200;
+        drillMultiplier = 1;
+        saveGame();
+        updateUI();
+        alert("You prestiged! All progress reset but you gain permanent bonus income.");
+      }
+    }
+
     function saveGame() {
       const save = {
         coins,
@@ -100,6 +152,10 @@
         autoPower,
         clickUpgradeCost,
         autoUpgradeCost,
+        drillUpgradeCost,
+        drillMultiplier,
+        prestigePoints,
+        prestigeBonus,
         lastSave: Date.now()
       };
       localStorage.setItem('mineClickerSave', JSON.stringify(save));
@@ -110,18 +166,21 @@
       if (save) {
         const now = Date.now();
         const timePassed = Math.floor((now - save.lastSave) / 1000);
-        coins = save.coins + (save.autoPower * timePassed);
+        coins = save.coins + (save.autoPower * save.drillMultiplier * timePassed * save.prestigeBonus);
         clickPower = save.clickPower;
         autoPower = save.autoPower;
         clickUpgradeCost = save.clickUpgradeCost;
         autoUpgradeCost = save.autoUpgradeCost;
+        drillUpgradeCost = save.drillUpgradeCost;
+        drillMultiplier = save.drillMultiplier;
+        prestigePoints = save.prestigePoints;
+        prestigeBonus = save.prestigeBonus;
         lastSave = now;
       }
     }
 
-    // Game loop
     setInterval(() => {
-      coins += autoPower;
+      coins += autoPower * drillMultiplier * prestigeBonus;
       updateUI();
       saveGame();
     }, 1000);
