@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mine Clicker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #f0f0f0;
+      text-align: center;
+      padding: 20px;
+    }
+    .button {
+      padding: 15px 30px;
+      margin: 10px;
+      font-size: 20px;
+      background-color: #444;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+    .button:hover {
+      background-color: #666;
+    }
+    .upgrade {
+      background-color: #222;
+      border: 1px solid #555;
+      margin: 10px auto;
+      padding: 10px;
+      width: 300px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>⛏️ Mine Clicker</h1>
+  <p>💰 <strong id="coins">0</strong> coins</p>
+  <p>👆 <strong id="clickPower">1</strong> per click</p>
+  <p>⏱️ <strong id="autoPower">0</strong> per second</p>
+  <button class="button" onclick="mine()">Mine!</button>
+
+  <div class="upgrade">
+    <p><strong>Upgrade Pickaxe</strong> (+1 per click)</p>
+    <p>Cost: <span id="clickUpgradeCost">10</span> coins</p>
+    <button class="button" onclick="buyClickUpgrade()">Buy</button>
+  </div>
+
+  <div class="upgrade">
+    <p><strong>Hire Miner</strong> (+1/sec)</p>
+    <p>Cost: <span id="autoUpgradeCost">50</span> coins</p>
+    <button class="button" onclick="buyAutoUpgrade()">Buy</button>
+  </div>
+
+  <script>
+    let coins = 0;
+    let clickPower = 1;
+    let autoPower = 0;
+    let clickUpgradeCost = 10;
+    let autoUpgradeCost = 50;
+    let lastSave = Date.now();
+
+    function updateUI() {
+      document.getElementById('coins').textContent = Math.floor(coins);
+      document.getElementById('clickPower').textContent = clickPower;
+      document.getElementById('autoPower').textContent = autoPower;
+      document.getElementById('clickUpgradeCost').textContent = clickUpgradeCost;
+      document.getElementById('autoUpgradeCost').textContent = autoUpgradeCost;
+    }
+
+    function mine() {
+      coins += clickPower;
+      updateUI();
+    }
+
+    function buyClickUpgrade() {
+      if (coins >= clickUpgradeCost) {
+        coins -= clickUpgradeCost;
+        clickPower++;
+        clickUpgradeCost = Math.floor(clickUpgradeCost * 1.5);
+        updateUI();
+      }
+    }
+
+    function buyAutoUpgrade() {
+      if (coins >= autoUpgradeCost) {
+        coins -= autoUpgradeCost;
+        autoPower++;
+        autoUpgradeCost = Math.floor(autoUpgradeCost * 2);
+        updateUI();
+      }
+    }
+
+    function saveGame() {
+      const save = {
+        coins,
+        clickPower,
+        autoPower,
+        clickUpgradeCost,
+        autoUpgradeCost,
+        lastSave: Date.now()
+      };
+      localStorage.setItem('mineClickerSave', JSON.stringify(save));
+    }
+
+    function loadGame() {
+      const save = JSON.parse(localStorage.getItem('mineClickerSave'));
+      if (save) {
+        const now = Date.now();
+        const timePassed = Math.floor((now - save.lastSave) / 1000);
+        coins = save.coins + (save.autoPower * timePassed);
+        clickPower = save.clickPower;
+        autoPower = save.autoPower;
+        clickUpgradeCost = save.clickUpgradeCost;
+        autoUpgradeCost = save.autoUpgradeCost;
+        lastSave = now;
+      }
+    }
+
+    // Game loop
+    setInterval(() => {
+      coins += autoPower;
+      updateUI();
+      saveGame();
+    }, 1000);
+
+    loadGame();
+    updateUI();
+  </script>
+</body>
+</html>
