@@ -21,7 +21,7 @@
       color: white;
       cursor: pointer;
       border-radius: 10px;
-      touch-action: manipulation;
+      touch-action: manipulation; /* disables zoom on tap */
     }
     .button:hover {
       background-color: #666;
@@ -75,6 +75,7 @@
   <button class="button" onclick="prestige()">Prestige</button>
 
   <script>
+    // Initialize variables as numbers
     let coins = 0;
     let clickPower = 1;
     let autoPower = 0;
@@ -98,7 +99,7 @@
     }
 
     function mine() {
-      coins += clickPower * prestigeBonus;
+      coins = Number(coins) + Number(clickPower) * Number(prestigeBonus);
       updateUI();
     }
 
@@ -167,26 +168,28 @@
       if (save) {
         const now = Date.now();
         const timePassed = Math.floor((now - save.lastSave) / 1000);
-        coins = save.coins + (save.autoPower * save.drillMultiplier * timePassed * save.prestigeBonus);
-        clickPower = save.clickPower;
-        autoPower = save.autoPower;
-        clickUpgradeCost = save.clickUpgradeCost;
-        autoUpgradeCost = save.autoUpgradeCost;
-        drillUpgradeCost = save.drillUpgradeCost;
-        drillMultiplier = save.drillMultiplier;
-        prestigePoints = save.prestigePoints;
-        prestigeBonus = save.prestigeBonus;
+        coins = Number(save.coins) + Number(save.autoPower) * Number(save.drillMultiplier) * timePassed * Number(save.prestigeBonus);
+        clickPower = Number(save.clickPower);
+        autoPower = Number(save.autoPower);
+        clickUpgradeCost = Number(save.clickUpgradeCost);
+        autoUpgradeCost = Number(save.autoUpgradeCost);
+        drillUpgradeCost = Number(save.drillUpgradeCost);
+        drillMultiplier = Number(save.drillMultiplier);
+        prestigePoints = Number(save.prestigePoints);
+        prestigeBonus = Number(save.prestigeBonus);
         lastSave = now;
       }
     }
 
+    // Auto income every second
     setInterval(() => {
       coins += autoPower * drillMultiplier * prestigeBonus;
       updateUI();
       saveGame();
     }, 1000);
 
-    window.onload = function () {
+    // Load game on page load
+    window.onload = () => {
       loadGame();
       updateUI();
     };
