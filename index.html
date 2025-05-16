@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Mine Clicker</title>
+  <title>⛏️ Mine Clicker</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #111;
-      color: #f0f0f0;
+      color: #eee;
       text-align: center;
       padding: 20px;
+      user-select: none;
+      -webkit-user-select: none;
     }
     .button {
       padding: 15px 30px;
@@ -21,7 +23,7 @@
       color: white;
       cursor: pointer;
       border-radius: 10px;
-      touch-action: manipulation; /* disables zoom on tap */
+      touch-action: manipulation; /* Disable zoom on tap */
     }
     .button:hover {
       background-color: #666;
@@ -35,7 +37,7 @@
       border-radius: 10px;
     }
     .section-title {
-      font-size: 1.2em;
+      font-size: 1.3em;
       margin-top: 30px;
       border-top: 1px solid #333;
       padding-top: 20px;
@@ -44,65 +46,69 @@
 </head>
 <body>
   <h1>⛏️ Mine Clicker</h1>
-  <p>💰 <strong id="coins">0</strong> coins</p>
-  <p>👆 <strong id="clickPower">1</strong> per click</p>
-  <p>⏱️ <strong id="autoPower">0</strong> per second</p>
+  <p>💰 Coins: <strong id="coins">0</strong></p>
+  <p>👆 Per Click: <strong id="clickPower">1</strong></p>
+  <p>⏱️ Per Second: <strong id="autoPower">0</strong></p>
   <p>💎 Prestige Gems: <strong id="prestigePoints">0</strong> (Bonus: <strong id="prestigeBonus">1.00x</strong>)</p>
+  
   <button class="button" onclick="mine()">⛏️ Mine!</button>
-
+  
   <div class="section-title">🔧 Upgrades</div>
-
+  
   <div class="upgrade">
     <p><strong>Upgrade Pickaxe</strong> (+1 per click)</p>
     <p>Cost: <span id="clickUpgradeCost">10</span> coins</p>
     <button class="button" onclick="buyClickUpgrade()">Buy</button>
   </div>
-
+  
   <div class="upgrade">
-    <p><strong>Hire Miner</strong> (+1/sec)</p>
+    <p><strong>Hire Miner</strong> (+1 per second)</p>
     <p>Cost: <span id="autoUpgradeCost">50</span> coins</p>
     <button class="button" onclick="buyAutoUpgrade()">Buy</button>
   </div>
-
+  
   <div class="upgrade">
-    <p><strong>Buy Drill</strong> (x2 auto income)</p>
+    <p><strong>Buy Drill</strong> (x2 auto income multiplier)</p>
     <p>Cost: <span id="drillUpgradeCost">200</span> coins</p>
     <button class="button" onclick="buyDrillUpgrade()">Buy</button>
   </div>
-
+  
   <div class="section-title">🔁 Prestige</div>
-  <p>Reach 10,000 coins to Prestige and earn gems that boost all income.</p>
+  <p>Reach 10,000 coins to Prestige and earn Gems that boost all income permanently.</p>
   <button class="button" onclick="prestige()">Prestige</button>
 
   <script>
-    // Initialize variables as numbers
+    // Variables
     let coins = 0;
     let clickPower = 1;
     let autoPower = 0;
-    let clickUpgradeCost = 10;
-    let autoUpgradeCost = 50;
-    let drillUpgradeCost = 200;
     let drillMultiplier = 1;
     let prestigePoints = 0;
     let prestigeBonus = 1.0;
-    let lastSave = Date.now();
 
+    let clickUpgradeCost = 10;
+    let autoUpgradeCost = 50;
+    let drillUpgradeCost = 200;
+
+    // Update UI elements
     function updateUI() {
       document.getElementById('coins').textContent = Math.floor(coins);
       document.getElementById('clickPower').textContent = clickPower;
       document.getElementById('autoPower').textContent = autoPower * drillMultiplier;
+      document.getElementById('prestigePoints').textContent = prestigePoints;
+      document.getElementById('prestigeBonus').textContent = prestigeBonus.toFixed(2) + 'x';
       document.getElementById('clickUpgradeCost').textContent = clickUpgradeCost;
       document.getElementById('autoUpgradeCost').textContent = autoUpgradeCost;
       document.getElementById('drillUpgradeCost').textContent = drillUpgradeCost;
-      document.getElementById('prestigePoints').textContent = prestigePoints;
-      document.getElementById('prestigeBonus').textContent = prestigeBonus.toFixed(2) + 'x';
     }
 
+    // Mine button function
     function mine() {
-      coins = Number(coins) + Number(clickPower) * Number(prestigeBonus);
+      coins += clickPower * prestigeBonus;
       updateUI();
     }
 
+    // Buy upgrades
     function buyClickUpgrade() {
       if (coins >= clickUpgradeCost) {
         coins -= clickUpgradeCost;
@@ -130,6 +136,7 @@
       }
     }
 
+    // Prestige resets progress but grants permanent bonus
     function prestige() {
       if (coins >= 10000) {
         prestigePoints++;
@@ -137,27 +144,30 @@
         coins = 0;
         clickPower = 1;
         autoPower = 0;
+        drillMultiplier = 1;
         clickUpgradeCost = 10;
         autoUpgradeCost = 50;
         drillUpgradeCost = 200;
-        drillMultiplier = 1;
-        saveGame();
+        alert("🎉 You prestiged! Your progress resets but you gain permanent bonus income.");
         updateUI();
-        alert("You prestiged! All progress reset but you gain permanent bonus income.");
+        saveGame();
+      } else {
+        alert("You need at least 10,000 coins to prestige.");
       }
     }
 
+    // Save/load game state to localStorage
     function saveGame() {
       const save = {
         coins,
         clickPower,
         autoPower,
-        clickUpgradeCost,
-        autoUpgradeCost,
-        drillUpgradeCost,
         drillMultiplier,
         prestigePoints,
         prestigeBonus,
+        clickUpgradeCost,
+        autoUpgradeCost,
+        drillUpgradeCost,
         lastSave: Date.now()
       };
       localStorage.setItem('mineClickerSave', JSON.stringify(save));
@@ -167,32 +177,37 @@
       const save = JSON.parse(localStorage.getItem('mineClickerSave'));
       if (save) {
         const now = Date.now();
-        const timePassed = Math.floor((now - save.lastSave) / 1000);
-        coins = Number(save.coins) + Number(save.autoPower) * Number(save.drillMultiplier) * timePassed * Number(save.prestigeBonus);
+        const offlineSeconds = Math.floor((now - save.lastSave) / 1000);
+
+        coins = Number(save.coins) + Number(save.autoPower) * Number(save.drillMultiplier) * offlineSeconds * Number(save.prestigeBonus);
         clickPower = Number(save.clickPower);
         autoPower = Number(save.autoPower);
-        clickUpgradeCost = Number(save.clickUpgradeCost);
-        autoUpgradeCost = Number(save.autoUpgradeCost);
-        drillUpgradeCost = Number(save.drillUpgradeCost);
         drillMultiplier = Number(save.drillMultiplier);
         prestigePoints = Number(save.prestigePoints);
         prestigeBonus = Number(save.prestigeBonus);
-        lastSave = now;
+        clickUpgradeCost = Number(save.clickUpgradeCost);
+        autoUpgradeCost = Number(save.autoUpgradeCost);
+        drillUpgradeCost = Number(save.drillUpgradeCost);
       }
     }
 
-    // Auto income every second
+    // Auto mine income every second
     setInterval(() => {
       coins += autoPower * drillMultiplier * prestigeBonus;
       updateUI();
       saveGame();
     }, 1000);
 
-    // Load game on page load
+    // Load saved game and update UI on page load
     window.onload = () => {
       loadGame();
       updateUI();
     };
+
+    // Save periodically every 10 seconds just in case
+    setInterval(() => {
+      saveGame();
+    }, 10000);
   </script>
 </body>
 </html>
